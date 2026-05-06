@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 定义配色变量：暖色系 */
+        :root {
+            --accent-color: #f97316; /* 活力橙 */
+            --text-main: #431407;    /* 焦糖深褐 */
+            --text-sub: #a8a29e;     /* 暖灰 */
+            --panel-bg: #fff7ed;     /* 橙色调极浅背景 */
+            --card-bg: #ffffff;      /* 白卡片 */
+            --border-color: #fed7aa; /* 橙色浅边框 */
+        }
+        body { margin: 0; width: 1920px; height: 1080px; background: #ffedd5; color: var(--text-main); font-family: 'Noto Sans SC', sans-serif; display: flex; justify-content: center; align-items: center; }
+
+        /* 外框：橙色渐变 */
+        .ppt-wrapper { padding: 4px; background: linear-gradient(135deg, #fb923c, #fcd34d); border-radius: 24px; width: 1860px; height: 1020px; box-shadow: 0 20px 40px rgba(67, 20, 7, 0.05); }
+
+        /* 主容器 */
+        .ppt-container { display: grid; grid-template-columns: 72% 28%; height: 100%; width: 100%; background: var(--panel-bg); gap: 20px; padding: 60px 40px 40px 40px; border-radius: 20px; box-sizing: border-box; overflow: visible; }
+
+        /* 模块卡片：暖白 */
+        .module-card { background: var(--card-bg); border: 2px solid var(--border-color); border-radius: 20px; position: relative; overflow: visible; box-shadow: 0 4px 0 rgba(251, 146, 60, 0.1); }
+
+        /* 标签：橙色填充 */
+        .module-label { position: absolute; top: -16px; left: 24px; background: var(--accent-color); padding: 4px 24px; color: #fff; font-weight: 900; font-size: 24px; border: 2px solid #fff; border-radius: 99px; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+        .left-main-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 55% 45%; gap: 20px; height: 100%; }
+
+        .short-title { font-size: 52px; font-weight: 900; color: #c2410c; line-height: 1.2;}
+
+          /* 参数行：清爽分割 */
+        .spec-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px dashed #7dd3fc;
+    /* 核心：防止长文本把行撑开太高 */
+    min-height: 40px;
+}
+
+/* 核心修复：当参数多于 12 个时，自动启动紧凑模式 */
+{% if p.specs|length > 12 %}
+.spec-item {
+    padding: 12px 0 !important; /* 压缩上下间距 */
+}
+.spec-item span:first-child {
+    font-size: 16px !important; /* 缩小 Label 字体 */
+}
+.spec-item span:last-child {
+    font-size: 20px !important; /* 缩小 Value 字体 */
+}
+{% endif %}
+
+/* 核心修复：防止 Value 过长导致换行把布局顶破 */
+.spec-item span:last-child {
+    max-width: 60%;
+    text-align: right;
+    word-break: break-all;
+    line-height: 1.1;
+}
+
+        .star-row { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 10px; }
+        .star-svg { width: 55px; height: 55px; }
+        .star-glow { filter: drop-shadow(0 0 0 transparent); } /* 去除辉光，保持扁平 */
+        .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <div class="ppt-wrapper"><div class="ppt-container">
+        <div class="left-main-grid">
+            <div class="module-card col-span-2 flex items-center px-12">
+                <div class="module-label">评测对象</div>
+                <div class="w-2/5 flex flex-col justify-center">
+                    <h1 class="text-3xl font-black italic text-orange-300 uppercase mb-2 leading-none">{{ p.brand }}</h1>
+                    <div class="short-title">{{ p.short_name }}</div>
+                </div>
+                <div class="flex-1 flex justify-center items-center"><img src="{{ img_b64 }}" class="max-h-[450px] object-contain drop-shadow-[0_10px_20px_rgba(67,20,7,0.1)]"></div>
+            </div>
+
+            <div class="module-card flex items-center justify-center">
+                <div class="module-label">数据评估</div>
+                <div class="flex items-center gap-10">
+
+                    <div class="text-center w-[280px]">
+                        <span class="text-xl font-black text-orange-300 block mb-4 uppercase tracking-widest">推荐指数</span>
+
+                        <svg class="svg-defs">
+                            <defs>
+                                <linearGradient id="grad-cozy-full" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="100%" stop-color="#f97316" /> </linearGradient>
+                                <linearGradient id="grad-cozy-half" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="50%" stop-color="#f97316" />
+                                    <stop offset="50%" stop-color="#fed7aa" />
+                                </linearGradient>
+                                <linearGradient id="grad-cozy-empty" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="100%" stop-color="#fed7aa" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+
+                        {% set score = p.grade|default(4.5)|float %}
+
+                        <div class="star-row star-glow">
+                            {% for i in range(4) %}
+                            <svg class="star-svg" viewBox="0 0 24 24" fill="url(#grad-cozy-full)">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                            </svg>
+                            {% endfor %}
+
+                            {% if score > 4 %}
+                            <svg class="star-svg" viewBox="0 0 24 24"
+                                 fill="url(#grad-cozy-{% if score >= 5 %}full{% elif score >= 4.5 %}half{% else %}empty{% endif %})">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                            </svg>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="w-px h-24 bg-orange-200"></div>
+
+                    <div class="pl-4 flex flex-col justify-center">
+                        <span class="text-xl font-black text-orange-300 block mb-1 uppercase">{{ platform_label }}参考价格</span>
+                        <span class="text-[60px] font-black text-[#431407] italic leading-none">¥ {{ p.price }}</span>
+                        <span class="text-[36px] font-black text-orange-500 mt-1 tracking-tighter leading-tight">商品详情评论区链接可见</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module-card p-8 flex flex-col justify-center">
+                <div class="module-label">推荐理由</div>
+                <div class="space-y-3">
+                    {% for r in p.reasons %}
+                    <div class="flex items-center gap-4 bg-orange-50 p-3 rounded-lg border-l-4 border-orange-400">
+                        <span class="text-orange-500 font-black text-2xl">0{{ loop.index }}</span>
+                        <span class="font-bold text-xl text-[#431407]">{{ r }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="module-card flex flex-col p-8 pt-16">
+            <div class="module-label">核心配置参数</div>
+            <div class="flex-1 flex flex-col justify-start">
+                {% if p.specs %}
+                    {% for s in p.specs %}
+                    <div class="spec-item">
+                        <span class="text-[#0284c7] font-black">{{ s.label }}</span>
+                        <span class="font-black text-sky-900">{{ s.value }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div></div>
+</body>
+</html>

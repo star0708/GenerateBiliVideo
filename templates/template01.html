@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Noto+Sans+SC:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --glass-blue: #06b6d4; 
+            --glass-purple: #8b5cf6; 
+            --panel-bg: rgba(9, 9, 11, 0.85); 
+        }
+        body { 
+            margin: 0; width: 1920px; height: 1080px; color: white; 
+            font-family: 'Noto Sans SC', sans-serif; display: flex; justify-content: center; align-items: center; 
+            background: radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.4) 0%, transparent 50%),
+                        radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.25) 0%, transparent 50%), #09090b;
+        }
+        /* 结构：完全复刻 01 */
+        .ppt-wrapper { padding: 4px; background: linear-gradient(135deg, var(--glass-blue), var(--glass-purple)); border-radius: 28px; width: 1860px; height: 1020px; }
+        .ppt-container { display: grid; grid-template-columns: 72% 28%; height: 100%; width: 100%; background: var(--panel-bg); backdrop-filter: blur(30px); gap: 20px; padding: 60px 40px 40px 40px; border-radius: 24px; box-sizing: border-box; overflow: visible; }
+        
+        .module-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-top: 1px solid rgba(255, 255, 255, 0.2); border-radius: 24px; position: relative; overflow: visible; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+        /* 标签样式：位置对齐 01，文字改回中文 */
+        .module-label { position: absolute; top: -16px; left: 24px; background: linear-gradient(90deg, var(--glass-blue), var(--glass-purple)); padding: 4px 24px; color: #fff; font-weight: 900; font-size: 22px; border-radius: 50px; z-index: 100; font-family: 'Noto Sans SC', sans-serif; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
+        
+        .left-main-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 55% 45%; gap: 20px; height: 100%; }
+        .short-title { font-size: 52px; font-weight: 900; color: white; line-height: 1.2; text-shadow: 0 0 20px rgba(6, 182, 212, 0.5); }
+       .spec-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* 1. 改为顶部对齐，多行时更美观 */
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    gap: 20px; /* 2. 增加间距，防止文字挨得太近 */
+}
+
+/* 3. 给左侧标签固定最小宽度，防止被挤压 */
+.spec-item span:first-child {
+    flex-shrink: 0;
+    min-width: 100px;
+}
+
+/* 4. 让右侧数值文字右对齐，并允许自适应换行 */
+.spec-item span:last-child {
+    text-align: right;
+    word-break: break-all; /* 强制长单词/长数字也能换行 */
+}
+
+        .star-row { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 10px; }
+        .star-svg { width: 55px; height: 55px; filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.8)); }
+        .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <div class="ppt-wrapper"><div class="ppt-container">
+        <div class="left-main-grid">
+            <div class="module-card col-span-2 flex items-center px-12">
+                <div class="module-label">评测对象</div>
+                <div class="w-2/5 flex flex-col justify-center">
+                    <h1 class="text-3xl font-black italic text-cyan-400/60 uppercase mb-2 leading-none" style="font-family:'Orbitron'">{{ p.brand }}</h1>
+                    <div class="short-title">{{ p.short_name }}</div>
+                </div>
+                <div class="flex-1 flex justify-center items-center"><img src="{{ img_b64 }}" class="max-h-[450px] object-contain drop-shadow-[0_0_50px_rgba(139,92,246,0.3)]"></div>
+            </div>
+
+            <div class="module-card flex items-center justify-center">
+                <div class="module-label">数据评估</div>
+                <div class="flex items-center gap-10">
+                    <div class="text-center w-[280px]">
+                        <span class="text-xl font-black text-purple-300 block mb-4 uppercase tracking-widest">推荐指数</span>
+                        <svg class="svg-defs">
+                            <defs>
+                                <linearGradient id="grad-glass-full" x1="0%" y1="0%" x2="100%" y2="100%"> <stop offset="0%" stop-color="#22d3ee" /> <stop offset="100%" stop-color="#8b5cf6" /> </linearGradient>
+                                <linearGradient id="grad-glass-half" x1="0%" y1="0%" x2="100%" y2="0%"> <stop offset="50%" stop-color="#22d3ee" /><stop offset="50%" stop-color="#333" /> </linearGradient>
+                                <linearGradient id="grad-glass-empty" x1="0%" y1="0%" x2="100%" y2="0%"> <stop offset="100%" stop-color="#333" /> </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="star-row">
+                            {% set score = p.grade|default(4.5)|float %}
+                            {# 1. 先画整数部分的满星 #}
+                            {% for i in range(score|int) %}
+                            <svg class="star-svg" viewBox="0 0 24 24" fill="url(#grad-glass-full)"> <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                            {% endfor %}
+
+                            {# 2. 如果有0.5分，画半颗星 #}
+                            {% if score % 1 >= 0.5 %}
+                            <svg class="star-svg" viewBox="0 0 24 24" fill="url(#grad-glass-half)"> <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="w-px h-24 bg-white/10"></div>
+                    <div class="pl-4 flex flex-col justify-center">
+                        <span class="text-xl font-black text-cyan-300 block mb-1 uppercase">{{ platform_label }}参考价格</span>
+                        <span class="text-[56px] font-black text-white" style="font-family:'Orbitron'">¥ {{ p.price }}</span>
+                        <span class="text-[34px] font-black text-purple-400 mt-1 tracking-tighter leading-tight">商品详情评论区链接可见</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module-card p-8 flex flex-col justify-center">
+                <div class="module-label">推荐理由</div>
+                <div class="space-y-3">
+                    {% for r in p.reasons %}
+                    <div class="flex items-center gap-4 bg-white/5 p-3 rounded-xl border-l-4 border-purple-500 backdrop-blur-md">
+                        <span class="text-cyan-400 font-black text-2xl" style="font-family:'Orbitron'">0{{ loop.index }}</span>
+                        <span class="font-bold text-xl text-zinc-100">{{ r }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="module-card flex flex-col p-8 pt-16">
+            <div class="module-label">核心配置参数</div>
+            <div class="flex-1 flex flex-col justify-start">
+                {% if p.specs %}
+                    {% for s in p.specs %}
+                    <div class="spec-item">
+                        <span class="text-cyan-400 font-black text-[20px]">{{ s.label }}</span>
+                        <span class="font-black text-[24px] text-white">{{ s.value }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div></div>
+</body>
+</html>

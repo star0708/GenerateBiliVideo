@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --tech-blue: #00d2ff; --neon-pink: #ff007a; --warning-yellow: #f7ff00; --panel-bg: #0d1117; }
+        body {
+            margin: 0;
+            width: 1920px;
+            min-height: 1080px; /* 改为最小高度 */
+            height: auto;       /* 高度自适应 */
+            background: #000;
+            color: white;
+            font-family: 'Noto Sans SC', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* 改为顶部对齐，防止长图居中导致上下留黑 */
+            padding: 30px 0;    /* 增加上下边距 */
+        }
+      .ppt-wrapper {
+        padding: 4px;
+            background: linear-gradient(90deg, #00d2ff, #ff007a, #f7ff00);
+            border-radius: 24px;
+            width: 1860px;
+            height: auto; /* 改为 auto */
+        }
+        .ppt-container {
+            display: block;
+            height: auto; /* 改为 auto */
+            width: 100%;
+            background: var(--panel-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-sizing: border-box;
+        }
+        
+       .module-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            position: relative;
+            height: auto; /* 改为 auto */
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+        }
+        .module-label { position: absolute; top: -16px; left: 24px; background: #000; padding: 4px 24px; color: var(--warning-yellow); font-weight: 900; font-size: 24px; border: 2px solid var(--warning-yellow); border-radius: 6px; z-index: 100; }
+        
+        /* 横评表格专属样式 */
+table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        table-layout: fixed; /* 必须是 fixed，否则长文本依然会撑开列宽 */
+        word-wrap: break-word;
+    }
+        th, td { border: 1px solid rgba(255,255,255,0.1); padding: 12px; }
+        th { background: rgba(0, 210, 255, 0.05); }
+        .col-header { width: 220px; } /* 左侧参数名列宽 */
+        
+        /* 文字高亮规范 */
+        .spec-label { color: var(--tech-blue); font-weight: 900; font-size: 24px; }
+       .spec-value {
+        font-weight: 900;
+        font-size: 22px;
+        color: #fff;
+        /* --- 核心修复代码 --- */
+        word-break: break-all;      /* 强制在任意字符间换行 */
+        overflow-wrap: break-word; /* 确保长单词/字符串能换行 */
+        line-height: 1.4;          /* 增加行高，防止多行时文字挤在一起 */
+        padding: 15px 8px;         /* 适当增加内边距 */
+        display: table-cell;       /* 确保遵循表格布局 */
+        vertical-align: middle;    /* 垂直居中 */
+    }
+        .product-name { font-size: 32px; font-weight: 900; color: var(--tech-blue); line-height: 1.2; }
+        .product-price { font-size: 28px; font-weight: 900; color: var(--warning-yellow); font-style: italic; margin-top: 8px; }
+        .grade-highlight { color: var(--warning-yellow); font-weight: 900; font-size: 28px; text-shadow: 0 0 10px rgba(247, 255, 0, 0.5); }
+    </style>
+</head>
+<body>
+    <div class="ppt-wrapper">
+        <div class="ppt-container">
+            <div class="module-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="col-header spec-label" style="font-size: 26px;">评测对象</th>
+                            {% for p in products %}
+                            <th>
+                                <div class="product-name">{{ p.short_name }}</div>
+                                <div class="product-price">¥ {{ p.price }}</div>
+                                <div style="margin-top: 15px; display: flex; justify-content: center;">
+                                    <img src="{{ p.main_img_b64 }}" style="width: 180px; height: 180px; object-fit: contain; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                                </div>
+                            </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for label in labels %}
+                        <tr>
+                            <td class="spec-label">{{ label }}</td>
+                            {% for p in products %}
+                            <td class="spec-value">
+                                {% for spec in p.specs %}
+                                    {% if spec.label == label %}{{ spec.value }}{% endif %}
+                                {% endfor %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

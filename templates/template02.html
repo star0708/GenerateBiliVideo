@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --tech-blue: #00d2ff; --neon-pink: #ff007a; --warning-yellow: #f7ff00; --panel-bg: #0d1117; }
+        body { margin: 0; width: 1920px; height: 1080px; background: #000; color: white; font-family: 'Noto Sans SC', sans-serif; display: flex; justify-content: center; align-items: center; }
+        .ppt-wrapper { padding: 4px; background: linear-gradient(90deg, #00d2ff, #ff007a, #f7ff00); border-radius: 24px; width: 1860px; height: 1020px; }
+        .ppt-container { display: grid; grid-template-columns: 72% 28%; height: 100%; width: 100%; background: var(--panel-bg); gap: 20px; padding: 60px 40px 40px 40px; border-radius: 20px; box-sizing: border-box; overflow: visible; }
+        .module-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; position: relative; overflow: visible; }
+        .module-label { position: absolute; top: -16px; left: 24px; background: #000; padding: 4px 24px; color: var(--warning-yellow); font-weight: 900; font-size: 24px; border: 2px solid var(--warning-yellow); border-radius: 6px; z-index: 100; }
+        .left-main-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 55% 45%; gap: 20px; height: 100%; }
+        .short-title { font-size: 52px; font-weight: 900; color: #00d2ff; line-height: 1.2;}
+        .spec-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        /* 星星评分相关样式 */
+        .star-row { display: flex; gap: 8px; align-items: center; justify-content: center; margin-top: 10px; }
+        .star-svg { width: 55px; height: 55px; } /* 稍微调大一点以填补视觉空白 */
+        .star-glow { filter: drop-shadow(0 0 8px rgba(255, 0, 122, 0.8)); }
+        .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <div class="ppt-wrapper"><div class="ppt-container">
+        <div class="left-main-grid">
+            <div class="module-card col-span-2 flex items-center px-12">
+                <div class="module-label">评测对象</div>
+                <div class="w-2/5 flex flex-col justify-center">
+                    <h1 class="text-3xl font-black italic text-zinc-700 uppercase mb-2 leading-none">{{ p.brand }}</h1>
+                    <div class="short-title">{{ p.short_name }}</div>
+                </div>
+                <div class="flex-1 flex justify-center items-center"><img src="{{ img_b64 }}" class="max-h-[450px] object-contain drop-shadow-[0_0_40px_rgba(0,210,255,0.3)]"></div>
+            </div>
+
+            <div class="module-card flex items-center justify-center">
+                <div class="module-label">数据评估</div>
+                <div class="flex items-center gap-10">
+
+                    <div class="text-center w-[280px]">
+                        <span class="text-xl font-black text-zinc-500 block mb-4 uppercase tracking-widest">推荐指数</span>
+
+                        <svg class="svg-defs">
+                            <defs>
+                                <linearGradient id="grad-full" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="100%" stop-color="#ff007a" />
+                                </linearGradient>
+                                <linearGradient id="grad-half" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="50%" stop-color="#ff007a" />
+                                    <stop offset="50%" stop-color="#333333" />
+                                </linearGradient>
+                                <linearGradient id="grad-empty" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="100%" stop-color="#333333" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+
+                        {% set score = p.grade|default(4.5)|float %}
+
+                        <div class="star-row star-glow">
+                            {% for i in range(4) %}
+                            <svg class="star-svg" viewBox="0 0 24 24" fill="url(#grad-full)">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                            </svg>
+                            {% endfor %}
+
+                            {% if score > 4 %}
+                            <svg class="star-svg" viewBox="0 0 24 24"
+                                 fill="url(#grad-{% if score >= 5 %}full{% elif score >= 4.5 %}half{% else %}empty{% endif %})">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                            </svg>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="w-px h-24 bg-zinc-800"></div>
+
+                    <div class="pl-4 flex flex-col justify-center">
+                        <span class="text-xl font-black text-zinc-500 block mb-1 uppercase">{{ platform_label }}参考价格</span>
+                        <span class="text-[60px] font-black text-warning-yellow italic leading-none">¥ {{ p.price }}</span>
+                        <span class="text-[36px] font-black text-cyan-400 mt-1 tracking-tighter leading-tight">商品详情评论区链接可见</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module-card p-8 flex flex-col justify-center">
+                <div class="module-label">推荐理由</div>
+                <div class="space-y-3">
+                    {% for r in p.reasons %}
+                    <div class="flex items-center gap-4 bg-white/5 p-3 rounded-lg border-l-4 border-cyan-500">
+                        <span class="text-cyan-400 font-black text-2xl">0{{ loop.index }}</span>
+                        <span class="font-bold text-xl">{{ r }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="module-card flex flex-col p-8 pt-16">
+            <div class="module-label">核心配置参数</div>
+            <div class="flex-1 flex flex-col justify-start">
+                {% if p.specs %}
+                    {% for s in p.specs %}
+                    <div class="spec-item">
+                        <span class="text-cyan-400 font-black text-[20px]">{{ s.label }}</span>
+                        <span class="font-black text-[24px] text-white">{{ s.value }}</span>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div></div>
+</body>
+</html>
